@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
+using VetClinicModelLibTest;
 
 namespace VetClinicServerTest.Models
 {
@@ -13,7 +14,7 @@ namespace VetClinicServerTest.Models
 
         public ClinicContext(DbContextOptions<ClinicContext> options) : base(options)
         {
-            //Database.EnsureDeleted();
+            Database.EnsureDeleted();
             
             if (Database.EnsureCreated())
                 DbInit();

@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
+
+using VetClinicModelLibTest;
 using VetClinicServerTest.Models;
 
 namespace VetClinicServerTest.Controllers

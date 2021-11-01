@@ -1,4 +1,4 @@
-﻿namespace VetClinicServerTest.Models
+﻿namespace VetClinicModelLibTest
 {
     public class Doctor : PersonBase
     {

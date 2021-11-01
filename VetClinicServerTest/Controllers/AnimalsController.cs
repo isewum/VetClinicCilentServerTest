@@ -1,4 +1,5 @@
-﻿using VetClinicServerTest.Models;
+﻿using VetClinicModelLibTest;
+using VetClinicServerTest.Models;
 
 namespace VetClinicServerTest.Controllers
 {
