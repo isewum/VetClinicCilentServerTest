@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.31729.503
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VetClinicServerTest", "VetClinicServerTest\VetClinicServerTest.csproj", "{1B28C192-D0BE-4DE6-AD82-7456BB4F23E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VetClinicModelLibTest", "VetClinicDataLibTest\VetClinicModelLibTest.csproj", "{A0E62612-C2CF-43D8-A571-CD3E8B0535C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VetClinicModelLibTest", "VetClinicDataLibTest\VetClinicModelLibTest.csproj", "{A0E62612-C2CF-43D8-A571-CD3E8B0535C4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VetClinicCilentTest2", "VetClinicCilentTest2\VetClinicCilentTest2.csproj", "{10E7D7B5-8B0E-4107-A6C7-A26CB025BF01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{A0E62612-C2CF-43D8-A571-CD3E8B0535C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A0E62612-C2CF-43D8-A571-CD3E8B0535C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A0E62612-C2CF-43D8-A571-CD3E8B0535C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10E7D7B5-8B0E-4107-A6C7-A26CB025BF01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10E7D7B5-8B0E-4107-A6C7-A26CB025BF01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10E7D7B5-8B0E-4107-A6C7-A26CB025BF01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10E7D7B5-8B0E-4107-A6C7-A26CB025BF01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
