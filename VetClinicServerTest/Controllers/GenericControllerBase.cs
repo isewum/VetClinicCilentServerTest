@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
-
 using VetClinicModelLibTest;
 using VetClinicServerTest.Models;
 
@@ -13,17 +12,19 @@ namespace VetClinicServerTest.Controllers
     public class GenericControllerBase<T> : ControllerBase where T : ModelBase
     {
         private readonly ClinicContext _context;
+        private readonly DbSet<T> dbSet;
 
         public GenericControllerBase(ClinicContext context)
         {
             _context = context;
+            dbSet = _context.Set<T>();
         }
 
         // GET: api/{entity}
         [HttpGet]
         public virtual async Task<IActionResult> GetMany()
         {
-            var entities = await _context.Set<T>().ToListAsync();
+            var entities = await dbSet.ToListAsync();
             return Ok(entities);
         }
 
@@ -31,14 +32,24 @@ namespace VetClinicServerTest.Controllers
         [HttpGet("{id}")]
         public virtual async Task<IActionResult> GetOne(int id)
         {
-            var entity = await _context.Set<T>().FindAsync(id);
-
+            var entity = await dbSet.FindAsync(id);
             if (entity == null)
             {
                 return NotFound();
             }
 
             return Ok(entity);
+        }
+
+        // POST: api/{entity}
+        [HttpPost]
+        public virtual async Task<IActionResult> Post(T entity)
+        {
+            entity.CreatedAt = DateTime.UtcNow;
+            await dbSet.AddAsync(entity);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetOne", new { id = entity.Id }, entity);
         }
 
         // PUT: api/{entity}/5
@@ -50,6 +61,8 @@ namespace VetClinicServerTest.Controllers
                 return BadRequest();
             }
 
+            var oldEntity = await dbSet.FindAsync(id);
+            entity.CreatedAt = oldEntity.CreatedAt;
             _context.Entry(entity).State = EntityState.Modified;
 
             try
@@ -68,31 +81,20 @@ namespace VetClinicServerTest.Controllers
                 }
             }
 
-            return CreatedAtAction("GetOne", new { id = entity.Id }, entity);
-        }
-
-        // POST: api/{entity}
-        [HttpPost]
-        public virtual async Task<IActionResult> Post(T entity)
-        {
-            entity.CreatedAt = DateTime.UtcNow;
-            await _context.Set<T>().AddAsync(entity);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetOne", new { id = entity.Id }, entity);
+            return Ok(entity);
         }
 
         // DELETE: api/{entity}/5
         [HttpDelete("{id}")]
         public virtual async Task<IActionResult> Delete(int id)
         {
-            var entry = await _context.Set<T>().FindAsync(id);
+            var entry = await dbSet.FindAsync(id);
             if (entry == null)
             {
                 return NotFound();
             }
 
-            _context.Set<T>().Remove(entry);
+            dbSet.Remove(entry);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -100,7 +102,7 @@ namespace VetClinicServerTest.Controllers
 
         private async Task<bool> EntryExists(int id)
         {
-            return await _context.Set<T>().AnyAsync(e => e.Id == id);
+            return await dbSet.AnyAsync(e => e.Id == id);
         }
     }
 }
