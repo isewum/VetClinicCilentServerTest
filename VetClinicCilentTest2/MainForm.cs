@@ -43,8 +43,14 @@ namespace VetClinicCilentTest2
             string url = dataType.Name + "s";
 
             dynamic result = await (dynamic)InvokeRequesterGenericMethod("GetAsync", new object[] { client, url } );
-            InvokeDataViewerMethod("SetRows", new object[] { result });
 
+            if (result == null)
+            {
+                connectionStatusLabel.Text = "Ошибка подключения.";
+                return;
+            }
+
+            InvokeDataViewerMethod("SetRows", new object[] { result });
             connectionStatusLabel.Text = $"Готово. Получено записей: {result.Count}";
         }
 
