@@ -10,7 +10,7 @@ using VetClinicModelLibTest;
 
 namespace VetClinicCilentTest2
 {
-    class DataViewer<T> where T : ModelBase
+    class DataViewer<T> where T : ModelBase, new()
     {
         private readonly DataGridView table = new();
         private readonly List<int> changedRows = new(), createdRows = new();
@@ -105,7 +105,10 @@ namespace VetClinicCilentTest2
                 return false;
 
             if (obj1 is ValueType)
-                return obj1 == obj2;
+                return (dynamic)obj1 == (dynamic)obj2;
+
+            if (obj1 is string)
+                return String.Equals(obj1, obj2);
 
             return obj1.Equals(obj2);
         }
@@ -114,22 +117,31 @@ namespace VetClinicCilentTest2
         {
             foreach (var property in typeof(T).GetProperties())
             {
-                if (property.GetValue(entity1) is ValueType)
+                if (!IsEqual(property.GetValue(entity1), property.GetValue(entity2)))
                 {
-                    if (property.GetValue(entity1) != property.GetValue(entity2))
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    if (!property.GetValue(entity1).Equals(property.GetValue(entity2)))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
             return true;
+        }
+
+        private static T Clone(T entity)
+        {
+            T copy = new();
+            foreach (var property in typeof(T).GetProperties())
+            {
+                var propValue = property.GetValue(entity);
+
+                if (propValue is string)
+                {
+                    property.SetValue(copy, $"{propValue}");
+                }
+                else
+                {
+                    property.SetValue(copy, propValue);
+                }
+            }
+            return copy;
         }
         #endregion
 
@@ -147,7 +159,7 @@ namespace VetClinicCilentTest2
             {
                 int row = e.RowIndex;
 
-                /*T newValue = table.Rows[row].DataBoundItem as T;
+                T newValue = table.Rows[row].DataBoundItem as T;
                 T oldValue = initialStateRows.FirstOrDefault(t => t.Id == newValue.Id);
 
                 if (IsEqual(newValue, oldValue))
@@ -158,9 +170,9 @@ namespace VetClinicCilentTest2
                     table.Rows[row].DefaultCellStyle = defaultCellStyle;
                 }
                 else
-                {*/
+                {
                     table.Rows[row].DefaultCellStyle = changedCellStyle;
-                //}
+                }
 
                 isRowChanged = false;
             }
@@ -185,7 +197,7 @@ namespace VetClinicCilentTest2
             if (!changedRows.Contains(entity.Id))
             {
                 changedRows.Add(entity.Id);
-                //initialStateRows.Add(new T(entity));
+                initialStateRows.Add(Clone(entity));
             }
             isRowChanged = true;
         }
