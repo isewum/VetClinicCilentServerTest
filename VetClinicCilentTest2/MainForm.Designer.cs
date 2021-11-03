@@ -33,8 +33,8 @@ namespace VetClinicCilentTest2
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.connectionStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.deleteButton = new System.Windows.Forms.Button();
-            this.saveButton = new System.Windows.Forms.Button();
             this.updateButton = new System.Windows.Forms.Button();
+            this.createButton = new System.Windows.Forms.Button();
             this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -47,7 +47,7 @@ namespace VetClinicCilentTest2
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
             this.tabControl.Size = new System.Drawing.Size(798, 400);
-            this.tabControl.TabIndex = 1;
+            this.tabControl.TabIndex = 0;
             this.tabControl.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.tabControl_Selecting);
             // 
             // statusStrip
@@ -68,7 +68,6 @@ namespace VetClinicCilentTest2
             // 
             this.deleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.deleteButton.BackColor = System.Drawing.SystemColors.Control;
-            this.deleteButton.Enabled = false;
             this.deleteButton.Location = new System.Drawing.Point(671, 406);
             this.deleteButton.Name = "deleteButton";
             this.deleteButton.Size = new System.Drawing.Size(117, 24);
@@ -77,28 +76,28 @@ namespace VetClinicCilentTest2
             this.deleteButton.UseVisualStyleBackColor = true;
             this.deleteButton.Click += new System.EventHandler(this.deleteButton_Click);
             // 
-            // saveButton
-            // 
-            this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.saveButton.Enabled = false;
-            this.saveButton.Location = new System.Drawing.Point(159, 406);
-            this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(156, 24);
-            this.saveButton.TabIndex = 3;
-            this.saveButton.Text = "Сохранить изменения";
-            this.saveButton.UseVisualStyleBackColor = true;
-            this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
-            // 
             // updateButton
             // 
             this.updateButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.updateButton.Location = new System.Drawing.Point(12, 406);
             this.updateButton.Name = "updateButton";
             this.updateButton.Size = new System.Drawing.Size(141, 24);
-            this.updateButton.TabIndex = 3;
+            this.updateButton.TabIndex = 1;
             this.updateButton.Text = "Обновить с сервера";
             this.updateButton.UseVisualStyleBackColor = true;
             this.updateButton.Click += new System.EventHandler(this.updateButton_Click);
+            // 
+            // createButton
+            // 
+            this.createButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.createButton.BackColor = System.Drawing.SystemColors.Control;
+            this.createButton.Location = new System.Drawing.Point(548, 406);
+            this.createButton.Name = "createButton";
+            this.createButton.Size = new System.Drawing.Size(117, 24);
+            this.createButton.TabIndex = 2;
+            this.createButton.Text = "Добавить запись";
+            this.createButton.UseVisualStyleBackColor = true;
+            this.createButton.Click += new System.EventHandler(this.createButton_Click);
             // 
             // MainForm
             // 
@@ -106,7 +105,7 @@ namespace VetClinicCilentTest2
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 455);
             this.Controls.Add(this.updateButton);
-            this.Controls.Add(this.saveButton);
+            this.Controls.Add(this.createButton);
             this.Controls.Add(this.deleteButton);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.tabControl);
@@ -128,8 +127,8 @@ namespace VetClinicCilentTest2
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel connectionStatusLabel;
         private System.Windows.Forms.Button deleteButton;
-        private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.Button updateButton;
+        private System.Windows.Forms.Button createButton;
     }
 }
 

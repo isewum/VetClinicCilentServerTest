@@ -1,12 +1,7 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using VetClinicModelLibTest;
 
@@ -23,46 +18,32 @@ namespace VetClinicCilentTest2
             client = new() { BaseAddress = new Uri(host) };
 
             InitializeComponent();
+            Requester.RequestSending += RequestSending;
+            Requester.ResponseReceived += ResponseReceived;
 
-            dataControllers = new List<object>();
-            dataControllers.Add(new DataViewer<Doctor>(tabControl, "Ветеринары"));
-            dataControllers.Add(new DataViewer<Owner>(tabControl, "Клиенты"));
-            dataControllers.Add(new DataViewer<Animal>(tabControl, "Животные"));
-            dataControllers.Add(new DataViewer<Vaccine>(tabControl, "Прививки"));
-            dataControllers.Add(new DataViewer<Service>(tabControl, "Услуги"));
+            dataControllers = new List<object>
+            {
+                new DataController<Doctor>(tabControl, "Ветеринары", client),
+                new DataController<Owner>(tabControl, "Клиенты", client),
+                new DataController<Animal>(tabControl, "Животные", client),
+                new DataController<Vaccine>(tabControl, "Прививки", client),
+                new DataController<Service>(tabControl, "Услуги", client)
+            };
         }
 
         #region Methods
-        private async void UpdateCurrentTab()
+        private void UpdateCurrentTab()
         {
-            connectionStatusLabel.Text = "Отправка запроса...";
-            Update();
-
-            int tabIndex = tabControl.SelectedIndex;
-            Type dataType = dataControllers[tabIndex].GetType().GetGenericArguments()[0];
-            string url = dataType.Name + "s";
-
-            dynamic result = await (dynamic)InvokeRequesterGenericMethod("GetAsync", new object[] { client, url } );
-
-            if (result == null)
-            {
-                connectionStatusLabel.Text = "Ошибка подключения.";
-                return;
-            }
-
-            InvokeDataViewerMethod("SetRows", new object[] { result });
-            connectionStatusLabel.Text = $"Готово. Получено записей: {result.Count}";
+            InvokeDataViewerMethod("UpdateRows");
         }
-
-        private void SaveCurrentTabChanges()
+        private void CreateCurrentTabRow()
         {
-            // TODO
-            //object changedRows = InvokeDataViewerMethod("GetChangedRows");
+            InvokeDataViewerMethod("CreateRow");
         }
 
         private void DeleleCurrentTabRow()
         {
-            // TODO
+            InvokeDataViewerMethod("DeleteCurrentRow");
         }
 
         private bool IsCurrentTabSet()
@@ -75,16 +56,6 @@ namespace VetClinicCilentTest2
             int tabIndex = tabControl.SelectedIndex;
             MethodInfo method = dataControllers[tabIndex].GetType().GetMethod(methodName);
             return method.Invoke(dataControllers[tabIndex], parameters);
-        }
-
-        private object InvokeRequesterGenericMethod(string methodName, object[] parameters = null)
-        {
-            int tabIndex = tabControl.SelectedIndex;
-            Type dataType = dataControllers[tabIndex].GetType().GetGenericArguments()[0];
-            MethodInfo method = typeof(Requester).GetMethod(methodName);
-            MethodInfo genericMethod = method.MakeGenericMethod(dataType);
-
-            return genericMethod.Invoke(null, parameters);
         }
         #endregion
 
@@ -113,15 +84,34 @@ namespace VetClinicCilentTest2
             UpdateCurrentTab();
         }
 
-        private void saveButton_Click(object sender, EventArgs e)
-        {
-            SaveCurrentTabChanges();
-        }
-
         private void deleteButton_Click(object sender, EventArgs e)
         {
             DeleleCurrentTabRow();
         }
+
+        private void createButton_Click(object sender, EventArgs e)
+        {
+            CreateCurrentTabRow();
+        }
+
+        private void RequestSending()
+        {
+            connectionStatusLabel.Text = "Отправка запроса...";
+            this.Enabled = false;
+            this.UseWaitCursor = true;
+        }
+
+        private void ResponseReceived(bool isSuccess, string errorMessage)
+        {
+            connectionStatusLabel.Text = isSuccess ? $"Готово." : errorMessage;
+            this.Enabled = true;
+            this.UseWaitCursor = false;
+            /*if (isSuccess)
+            {
+                MessageBox.Show(errorMessage);
+            }*/
+        }
         #endregion
+
     }
 }
