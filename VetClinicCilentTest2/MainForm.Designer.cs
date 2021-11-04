@@ -36,6 +36,7 @@ namespace VetClinicCilentTest2
             this.updateButton = new System.Windows.Forms.Button();
             this.createButton = new System.Windows.Forms.Button();
             this.parentPanel = new System.Windows.Forms.Panel();
+            this.editButton = new System.Windows.Forms.Button();
             this.statusStrip.SuspendLayout();
             this.parentPanel.SuspendLayout();
             this.SuspendLayout();
@@ -74,7 +75,7 @@ namespace VetClinicCilentTest2
             this.deleteButton.Location = new System.Drawing.Point(671, 406);
             this.deleteButton.Name = "deleteButton";
             this.deleteButton.Size = new System.Drawing.Size(117, 24);
-            this.deleteButton.TabIndex = 3;
+            this.deleteButton.TabIndex = 4;
             this.deleteButton.Text = "Удалить запись";
             this.deleteButton.UseVisualStyleBackColor = true;
             this.deleteButton.Click += new System.EventHandler(this.deleteButton_Click);
@@ -97,13 +98,14 @@ namespace VetClinicCilentTest2
             this.createButton.Location = new System.Drawing.Point(548, 406);
             this.createButton.Name = "createButton";
             this.createButton.Size = new System.Drawing.Size(117, 24);
-            this.createButton.TabIndex = 2;
+            this.createButton.TabIndex = 3;
             this.createButton.Text = "Добавить запись";
             this.createButton.UseVisualStyleBackColor = true;
             this.createButton.Click += new System.EventHandler(this.createButton_Click);
             // 
             // parentPanel
             // 
+            this.parentPanel.Controls.Add(this.editButton);
             this.parentPanel.Controls.Add(this.deleteButton);
             this.parentPanel.Controls.Add(this.createButton);
             this.parentPanel.Controls.Add(this.updateButton);
@@ -113,6 +115,18 @@ namespace VetClinicCilentTest2
             this.parentPanel.Name = "parentPanel";
             this.parentPanel.Size = new System.Drawing.Size(800, 455);
             this.parentPanel.TabIndex = 4;
+            // 
+            // editButton
+            // 
+            this.editButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.editButton.BackColor = System.Drawing.SystemColors.Control;
+            this.editButton.Location = new System.Drawing.Point(392, 406);
+            this.editButton.Name = "editButton";
+            this.editButton.Size = new System.Drawing.Size(150, 24);
+            this.editButton.TabIndex = 2;
+            this.editButton.Text = "Редактировать запись";
+            this.editButton.UseVisualStyleBackColor = true;
+            this.editButton.Click += new System.EventHandler(this.editButton_Click);
             // 
             // MainForm
             // 
@@ -143,6 +157,7 @@ namespace VetClinicCilentTest2
         private System.Windows.Forms.Button updateButton;
         private System.Windows.Forms.Button createButton;
         private System.Windows.Forms.Panel parentPanel;
+        private System.Windows.Forms.Button editButton;
     }
 }
 

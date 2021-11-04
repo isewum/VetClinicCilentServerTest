@@ -37,6 +37,7 @@ namespace VetClinicCilentTest2
         {
             InvokeDataControllerMethod("UpdateRows");
         }
+
         private void CreateCurrentTabRow()
         {
             InvokeDataControllerMethod("CreateRow");
@@ -46,6 +47,12 @@ namespace VetClinicCilentTest2
         {
             InvokeDataControllerMethod("DeleteCurrentRow");
         }
+
+        private void EditCurrentTabRow()
+        {
+            InvokeDataControllerMethod("EditCurrentRow");
+        }
+
 
         private bool IsCurrentTabSet()
         {
@@ -101,6 +108,11 @@ namespace VetClinicCilentTest2
             CreateCurrentTabRow();
         }
 
+        private void editButton_Click(object sender, EventArgs e)
+        {
+            EditCurrentTabRow();
+        }
+
         private void RequestSending()
         {
             connectionStatusLabel.Text = "Отправка запроса...";
@@ -117,6 +129,7 @@ namespace VetClinicCilentTest2
             bool buttonState = isSuccess || IsCurrentTabSet();
             deleteButton.Enabled = buttonState;
             createButton.Enabled = buttonState;
+            editButton.Enabled = buttonState;
 
             /*if (!isSuccess)
             {
@@ -124,6 +137,5 @@ namespace VetClinicCilentTest2
             }*/
         }
         #endregion
-
     }
 }

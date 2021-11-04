@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
-using System.Reflection;
-using System.Text;
+﻿using System.Net.Http;
 using System.Windows.Forms;
 using VetClinicModelLibTest;
 
@@ -17,14 +9,11 @@ namespace VetClinicCilentTest2
         private readonly DataGridView table = new();
         private readonly HttpClient client;
 
-        private bool /*isCellEditing,*/ isRowsInitialized;
-        private object lastCellValue;
+        private bool isRowsInitialized;
 
         public DataController(TabControl tabControl, string tabName, HttpClient client)
         {
-            //isCellEditing = false;
             isRowsInitialized = false;
-            lastCellValue = null;
             this.client = client;
 
             InitControls(tabControl, tabName);
@@ -61,12 +50,10 @@ namespace VetClinicCilentTest2
             table.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
             table.RowTemplate = new DataGridViewRow{ Height = 25 };
             table.Size = new System.Drawing.Size(786, 344);
-            table.StandardTab = false;
+            table.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            table.ReadOnly = true;
 
-            table.CellBeginEdit += CellBeginEdit;
-            table.CellEndEdit += CellEndEdit;
-            table.CellValidating += CellValidating;
-
+            table.CellDoubleClick += CellDoubleClick;
         }
 
         public bool IsRowsSet()
@@ -80,11 +67,8 @@ namespace VetClinicCilentTest2
             if (rows == null)
                 return;
 
-            //table.Rows.Clear();
-            //table.Rows.Add(rows);
             table.DataSource = rows;
             isRowsInitialized = true;
-            lastCellValue = null;
         }
 
         public async void CreateRow()
@@ -93,7 +77,7 @@ namespace VetClinicCilentTest2
                 return;
 
             T entity = new();
-            CreateDialog dialog = new CreateDialog(entity);
+            EntityDialog dialog = new EntityDialog(DialogTypes.Create, entity);
             dialog.ShowDialog();
             if (dialog.DialogResult != DialogResult.OK)
                 return;
@@ -105,37 +89,31 @@ namespace VetClinicCilentTest2
             }
         }
 
-        public async void SaveRow(DataGridViewCell cell)
+        public async void EditCurrentRow()
         {
-            T entity = cell.OwningRow.DataBoundItem as T;
-            bool saved = await Requester.UpdateAsync<T>(client, GetTypeUrl(entity.Id), entity);
+            if (!isRowsInitialized || table.SelectedRows.Count == 0)
+                return;
+
+            T entity = table.SelectedRows[0].DataBoundItem as T;
+            T copy = (T)entity.Clone();
+            EntityDialog dialog = new EntityDialog(DialogTypes.Edit, copy);
+            dialog.ShowDialog();
+            if (dialog.DialogResult != DialogResult.OK || entity.Equals(copy))
+                return;
+
+            bool saved = await Requester.UpdateAsync<T>(client, GetTypeUrl(entity.Id), copy);
             if (saved)
             {
                 UpdateRows();
-            }
-            else
-            {
-                CancelCellChange(cell);
             }
         }
 
         public async void DeleteCurrentRow()
         {
-            if (!isRowsInitialized)
+            if (!isRowsInitialized || table.SelectedRows.Count == 0)
                 return;
 
-            T entity = null;
-            if (table.SelectedRows.Count == 1)
-            {
-                entity = table.SelectedRows[0].DataBoundItem as T;
-            }
-            else if (table.SelectedCells.Count == 1)
-            {
-                int row = table.SelectedCells[0].RowIndex;
-                entity = table.Rows[row].DataBoundItem as T;
-            }
-            if (entity == null)
-                return;
+            T entity = table.SelectedRows[0].DataBoundItem as T;
             
             DialogResult result = MessageBox.Show("Точно удалить строку?", "Внимание!", MessageBoxButtons.YesNo);
             if (result == DialogResult.Yes)
@@ -148,11 +126,6 @@ namespace VetClinicCilentTest2
             }
         }
 
-        private void CancelCellChange(DataGridViewCell cell)
-        {
-            cell.Value = lastCellValue;
-        }
-
         private static string GetTypeUrl(int? id = null)
         {
             if (id != null)
@@ -160,61 +133,12 @@ namespace VetClinicCilentTest2
 
             return $"{typeof(T).Name}s";
         }
-
-        private static bool IsEqual(object obj1, object obj2)
-        {
-            if (obj1.GetType() != obj2.GetType())
-                return false;
-
-            if (obj1 is ValueType)
-                return (dynamic)obj1 == (dynamic)obj2;
-
-            if (obj1 is string)
-                return String.Equals(obj1, obj2);
-
-            return obj1.Equals(obj2);
-        }
         #endregion
 
         #region EventHandlers
-        private void CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        private void CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            //isCellEditing = true;
-            lastCellValue = table.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
-        }
-
-        private void CellEndEdit(object sender, DataGridViewCellEventArgs e)
-        {
-            //isCellEditing = false;
-            var cell = table.Rows[e.RowIndex].Cells[e.ColumnIndex];
-            if (!IsEqual(lastCellValue, cell.Value))
-            {
-                T entity = cell.OwningRow.DataBoundItem as T;
-                var context = new ValidationContext(entity);
-                var results = new List<ValidationResult>();
-                bool isValid = Validator.TryValidateObject(entity, context, results, true);
-
-                if (isValid)
-                {
-                    SaveRow(cell);
-                    return;
-                }
-                
-                StringBuilder builder = new(results.Count);
-                foreach (var res in results)
-                {
-                    builder.AppendLine(res.ErrorMessage);
-                }
-                MessageBox.Show(builder.ToString(), "Ошибка!");
-
-                CancelCellChange(cell);
-                table.BeginEdit(false);
-            }
-        }
-
-        private void CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
-        {
-            //if (!isCellEditing) return;
+            EditCurrentRow();
         }
         #endregion
     }

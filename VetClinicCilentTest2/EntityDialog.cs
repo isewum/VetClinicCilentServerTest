@@ -6,12 +6,17 @@ using System.Windows.Forms;
 
 namespace VetClinicCilentTest2
 {
-    public partial class CreateDialog : Form
+    public partial class EntityDialog : Form
     {
-        public CreateDialog(object entity)
+        private readonly string createTitle = "Добавление записи";
+        private readonly string editTitle = "Редактирование записи";
+
+        public EntityDialog(DialogTypes type, object entity)
         {
             InitializeComponent();
             propertyGrid.SelectedObject = entity;
+
+            this.Text = type == DialogTypes.Create ? createTitle : editTitle;
         }
 
         private void okButton_Click(object sender, EventArgs e)
@@ -40,5 +45,11 @@ namespace VetClinicCilentTest2
             DialogResult = DialogResult.Cancel;
             Close();
         }
+    }
+
+    public enum DialogTypes
+    {
+        Create,
+        Edit
     }
 }

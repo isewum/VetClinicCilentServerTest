@@ -1,7 +1,7 @@
 ﻿
 namespace VetClinicCilentTest2
 {
-    partial class CreateDialog
+    partial class EntityDialog
     {
         /// <summary>
         /// Required designer variable.
