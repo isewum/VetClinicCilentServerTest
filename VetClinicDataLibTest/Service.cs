@@ -13,5 +13,22 @@ namespace VetClinicModelLibTest
 
         [DisplayName("Цена"), Range(0, double.MaxValue), Required]
         public double Price { get; set; }
+
+        public override bool Equals(ModelBase entity)
+        {
+            if (!(entity is Service))
+                return base.Equals(entity);
+
+            Service service = entity as Service;
+            return Price == service.Price
+                && string.Equals(Title, service.Title)
+                && string.Equals(Description, service.Description)
+                && base.Equals(entity);
+        }
+
+        public override object Clone()
+        {
+            return this.MemberwiseClone();
+        }
     }
 }

@@ -17,17 +17,31 @@ namespace VetClinicModelLibTest
 
         [DisplayName("Дата рождения"), DataType(DataType.Date), Required]
         public DateTime BirthDate { get; set; }
+
+        public override bool Equals(ModelBase entity)
+        {
+            if (!(entity is Animal))
+                return base.Equals(entity);
+
+            Animal animal = entity as Animal;
+            return OwnerId == animal.OwnerId
+                && Type == animal.Type
+                && BirthDate == animal.BirthDate
+                && string.Equals(Name, animal.Name)
+                && base.Equals(entity);
+        }
+
+        public override object Clone()
+        {
+            return this.MemberwiseClone();
+        }
     }
 
     public enum AnimalTypes
     {
-        [Display(Name = "Собака")]
         Dog,
-        [Display(Name = "Кот")]
         Cat,
-        [Display(Name = "Хомяк")]
         Hamster,
-        [Display(Name = "Медведь")]
         Bear
     }
 }

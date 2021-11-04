@@ -17,5 +17,23 @@ namespace VetClinicModelLibTest
 
         [DisplayName("Дата постановки"), Required]
         public DateTime DoneAt { get; set; }
+
+        public override bool Equals(ModelBase entity)
+        {
+            if (!(entity is Vaccine))
+                return base.Equals(entity);
+
+            Vaccine vaccine = entity as Vaccine;
+            return AnimalId == vaccine.AnimalId
+                && DoctorId == vaccine.DoctorId
+                && DoneAt == vaccine.DoneAt
+                && string.Equals(Title, vaccine.Title)
+                && base.Equals(entity);
+        }
+
+        public override object Clone()
+        {
+            return this.MemberwiseClone();
+        }
     }
 }
