@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
+using System.Reflection;
+using System.Text;
 using System.Windows.Forms;
 using VetClinicModelLibTest;
 
@@ -20,7 +25,6 @@ namespace VetClinicCilentTest2
             //isCellEditing = false;
             isRowsInitialized = false;
             lastCellValue = null;
-
             this.client = client;
 
             InitControls(tabControl, tabName);
@@ -34,7 +38,18 @@ namespace VetClinicCilentTest2
         /// <param name="tabName">Отображаемое название элемента TabPage.</param>
         private void InitControls(TabControl tabControl, string tabName)
         {
+            TabPage tabPage = new()
+            {
+                Text = tabName,
+                Name = typeof(T).Name,
+                Size = new System.Drawing.Size(790, 352)
+            };
+            tabPage.Controls.Add(table);
+            tabControl.TabPages.Add(tabPage);
+
             table.AllowUserToOrderColumns = true;
+            table.AllowUserToAddRows = false;
+            table.AllowUserToDeleteRows = false;
             table.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             table.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             table.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
@@ -46,19 +61,12 @@ namespace VetClinicCilentTest2
             table.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
             table.RowTemplate = new DataGridViewRow{ Height = 25 };
             table.Size = new System.Drawing.Size(786, 344);
+            table.StandardTab = false;
 
             table.CellBeginEdit += CellBeginEdit;
             table.CellEndEdit += CellEndEdit;
             table.CellValidating += CellValidating;
 
-            TabPage tabPage = new()
-            {
-                Text = tabName,
-                Name = typeof(T).Name,
-                Size = new System.Drawing.Size(790, 352)
-            };
-            tabPage.Controls.Add(table);
-            tabControl.TabPages.Add(tabPage);
         }
 
         public bool IsRowsSet()
@@ -68,10 +76,15 @@ namespace VetClinicCilentTest2
 
         public async void UpdateRows()
         {
+            var rows = await Requester.GetAsync<T>(client, GetTypeUrl());
+            if (rows == null)
+                return;
+
             //table.Rows.Clear();
             //table.Rows.Add(rows);
-            table.DataSource = await GetRows();
+            table.DataSource = rows;
             isRowsInitialized = true;
+            lastCellValue = null;
         }
 
         public async void CreateRow()
@@ -85,20 +98,24 @@ namespace VetClinicCilentTest2
             if (dialog.DialogResult != DialogResult.OK)
                 return;
 
-            bool created = await SaveCreatedRow(entity);
+            bool created = await Requester.CreateAsync<T>(client, GetTypeUrl(), entity);
             if (created)
             {
                 UpdateRows();
             }
         }
 
-        public async void SaveRow(int id)
+        public async void SaveRow(DataGridViewCell cell)
         {
-            T entity = table.Rows[id].DataBoundItem as T;
-            bool saved = await SaveEditedRow(entity);
+            T entity = cell.OwningRow.DataBoundItem as T;
+            bool saved = await Requester.UpdateAsync<T>(client, GetTypeUrl(entity.Id), entity);
             if (saved)
             {
                 UpdateRows();
+            }
+            else
+            {
+                CancelCellChange(cell);
             }
         }
 
@@ -123,7 +140,7 @@ namespace VetClinicCilentTest2
             DialogResult result = MessageBox.Show("Точно удалить строку?", "Внимание!", MessageBoxButtons.YesNo);
             if (result == DialogResult.Yes)
             {
-                bool deleted = await DeleteRow(entity.Id);
+                bool deleted = await Requester.DeleteAsync(client, GetTypeUrl(entity.Id));
                 if (deleted)
                 {
                     UpdateRows();
@@ -131,24 +148,9 @@ namespace VetClinicCilentTest2
             }
         }
 
-        private async Task<List<T>> GetRows()
+        private void CancelCellChange(DataGridViewCell cell)
         {
-            return await Requester.GetAsync<T>(client, GetTypeUrl());
-        }
-
-        private async Task<bool> SaveEditedRow(T entity)
-        {
-            return await Requester.UpdateAsync<T>(client, GetTypeUrl(entity.Id), entity);
-        }
-
-        private async Task<bool> SaveCreatedRow(T entity)
-        {
-            return await Requester.CreateAsync<T>(client, GetTypeUrl(), entity);
-        }
-
-        private async Task<bool> DeleteRow(int id)
-        {
-            return await Requester.DeleteAsync(client, GetTypeUrl(id));
+            cell.Value = lastCellValue;
         }
 
         private static string GetTypeUrl(int? id = null)
@@ -184,10 +186,29 @@ namespace VetClinicCilentTest2
         private void CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             //isCellEditing = false;
-            object newCellValue = table.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
-            if (!IsEqual(lastCellValue, newCellValue))
+            var cell = table.Rows[e.RowIndex].Cells[e.ColumnIndex];
+            if (!IsEqual(lastCellValue, cell.Value))
             {
-                SaveRow(e.RowIndex);
+                T entity = cell.OwningRow.DataBoundItem as T;
+                var context = new ValidationContext(entity);
+                var results = new List<ValidationResult>();
+                bool isValid = Validator.TryValidateObject(entity, context, results, true);
+
+                if (isValid)
+                {
+                    SaveRow(cell);
+                    return;
+                }
+                
+                StringBuilder builder = new(results.Count);
+                foreach (var res in results)
+                {
+                    builder.AppendLine(res.ErrorMessage);
+                }
+                MessageBox.Show(builder.ToString(), "Ошибка!");
+
+                CancelCellChange(cell);
+                table.BeginEdit(false);
             }
         }
 

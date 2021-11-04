@@ -35,18 +35,21 @@ namespace VetClinicCilentTest2
             this.deleteButton = new System.Windows.Forms.Button();
             this.updateButton = new System.Windows.Forms.Button();
             this.createButton = new System.Windows.Forms.Button();
+            this.parentPanel = new System.Windows.Forms.Panel();
             this.statusStrip.SuspendLayout();
+            this.parentPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl
             // 
-            this.tabControl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.tabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl.ItemSize = new System.Drawing.Size(140, 40);
-            this.tabControl.Location = new System.Drawing.Point(2, 0);
+            this.tabControl.Location = new System.Drawing.Point(3, 1);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(798, 400);
+            this.tabControl.Size = new System.Drawing.Size(796, 400);
             this.tabControl.TabIndex = 0;
             this.tabControl.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.tabControl_Selecting);
             // 
@@ -99,16 +102,25 @@ namespace VetClinicCilentTest2
             this.createButton.UseVisualStyleBackColor = true;
             this.createButton.Click += new System.EventHandler(this.createButton_Click);
             // 
+            // parentPanel
+            // 
+            this.parentPanel.Controls.Add(this.deleteButton);
+            this.parentPanel.Controls.Add(this.createButton);
+            this.parentPanel.Controls.Add(this.updateButton);
+            this.parentPanel.Controls.Add(this.tabControl);
+            this.parentPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.parentPanel.Location = new System.Drawing.Point(0, 0);
+            this.parentPanel.Name = "parentPanel";
+            this.parentPanel.Size = new System.Drawing.Size(800, 455);
+            this.parentPanel.TabIndex = 4;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 455);
-            this.Controls.Add(this.updateButton);
-            this.Controls.Add(this.createButton);
-            this.Controls.Add(this.deleteButton);
             this.Controls.Add(this.statusStrip);
-            this.Controls.Add(this.tabControl);
+            this.Controls.Add(this.parentPanel);
             this.MinimumSize = new System.Drawing.Size(600, 400);
             this.Name = "MainForm";
             this.Text = "VetClinic Client";
@@ -116,6 +128,7 @@ namespace VetClinicCilentTest2
             this.Shown += new System.EventHandler(this.MainForm_Shown);
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
+            this.parentPanel.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -129,6 +142,7 @@ namespace VetClinicCilentTest2
         private System.Windows.Forms.Button deleteButton;
         private System.Windows.Forms.Button updateButton;
         private System.Windows.Forms.Button createButton;
+        private System.Windows.Forms.Panel parentPanel;
     }
 }
 

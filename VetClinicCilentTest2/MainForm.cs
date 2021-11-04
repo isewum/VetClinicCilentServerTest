@@ -18,8 +18,6 @@ namespace VetClinicCilentTest2
             client = new() { BaseAddress = new Uri(host) };
 
             InitializeComponent();
-            Requester.RequestSending += RequestSending;
-            Requester.ResponseReceived += ResponseReceived;
 
             dataControllers = new List<object>
             {
@@ -29,29 +27,38 @@ namespace VetClinicCilentTest2
                 new DataController<Vaccine>(tabControl, "Прививки", client),
                 new DataController<Service>(tabControl, "Услуги", client)
             };
+
+            Requester.RequestSending += RequestSending;
+            Requester.ResponseReceived += ResponseReceived;
         }
 
         #region Methods
         private void UpdateCurrentTab()
         {
-            InvokeDataViewerMethod("UpdateRows");
+            InvokeDataControllerMethod("UpdateRows");
         }
         private void CreateCurrentTabRow()
         {
-            InvokeDataViewerMethod("CreateRow");
+            InvokeDataControllerMethod("CreateRow");
         }
 
         private void DeleleCurrentTabRow()
         {
-            InvokeDataViewerMethod("DeleteCurrentRow");
+            InvokeDataControllerMethod("DeleteCurrentRow");
         }
 
         private bool IsCurrentTabSet()
         {
-            return (bool)InvokeDataViewerMethod("IsRowsSet");
+            return (bool)InvokeDataControllerMethod("IsRowsSet");
         }
 
-        private object InvokeDataViewerMethod(string methodName, object[] parameters = null)
+        /// <summary>
+        /// Вызов метода класса <see cref="DataController{T}"/> с использованием отражения.
+        /// </summary>
+        /// <param name="methodName">Имя метода.</param>
+        /// <param name="parameters">Аргументы, принимаемые методом.</param>
+        /// <returns>Объект, возвращаемый вызываемым методом.</returns>
+        private object InvokeDataControllerMethod(string methodName, object[] parameters = null)
         {
             int tabIndex = tabControl.SelectedIndex;
             MethodInfo method = dataControllers[tabIndex].GetType().GetMethod(methodName);
@@ -97,18 +104,23 @@ namespace VetClinicCilentTest2
         private void RequestSending()
         {
             connectionStatusLabel.Text = "Отправка запроса...";
-            this.Enabled = false;
+            parentPanel.Enabled = false;
             this.UseWaitCursor = true;
         }
 
         private void ResponseReceived(bool isSuccess, string errorMessage)
         {
             connectionStatusLabel.Text = isSuccess ? $"Готово." : errorMessage;
-            this.Enabled = true;
+            parentPanel.Enabled = true;
             this.UseWaitCursor = false;
-            /*if (isSuccess)
+
+            bool buttonState = isSuccess || IsCurrentTabSet();
+            deleteButton.Enabled = buttonState;
+            createButton.Enabled = buttonState;
+
+            /*if (!isSuccess)
             {
-                MessageBox.Show(errorMessage);
+                MessageBox.Show(errorMessage, "Ошибка!");
             }*/
         }
         #endregion

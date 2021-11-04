@@ -1,29 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace VetClinicCilentTest2
 {
     public partial class CreateDialog : Form
     {
-        //public object ResultObject => propertyGrid.SelectedObject;
-
-        public CreateDialog(object obj)
+        public CreateDialog(object entity)
         {
             InitializeComponent();
-            propertyGrid.SelectedObject = obj;
+            propertyGrid.SelectedObject = entity;
         }
 
         private void okButton_Click(object sender, EventArgs e)
         {
-            DialogResult = DialogResult.OK;
-            Close();
+            var context = new ValidationContext(propertyGrid.SelectedObject);
+            var results = new List<ValidationResult>();
+            bool isValid = Validator.TryValidateObject(propertyGrid.SelectedObject, context, results, true);
+
+            if (isValid)
+            {
+                DialogResult = DialogResult.OK;
+                Close();
+                return;
+            }
+
+            StringBuilder builder = new(results.Count);
+            foreach (var res in results)
+            {
+                builder.AppendLine(res.ErrorMessage);
+            }
+            MessageBox.Show(builder.ToString(), "Ошибка!");
         }
 
         private void cancelButton_Click(object sender, EventArgs e)
