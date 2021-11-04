@@ -62,7 +62,10 @@ namespace VetClinicServerTest.Controllers
             }
 
             var oldEntity = await dbSet.FindAsync(id);
-            entity.CreatedAt = oldEntity.CreatedAt;
+            if (entity.CreatedAt != oldEntity.CreatedAt)
+                entity.CreatedAt = oldEntity.CreatedAt;
+
+            _context.Entry(oldEntity).State = EntityState.Detached;
             _context.Entry(entity).State = EntityState.Modified;
 
             try

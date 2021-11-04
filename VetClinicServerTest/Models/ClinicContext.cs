@@ -31,7 +31,7 @@ namespace VetClinicServerTest.Models
                 var doctor = new Doctor() { FirstName = $"doctorFirstName{i}", LastName = $"doctorLastName{i}", Phone = "123456", CreatedAt = now };
                 Doctors.Add(doctor);
 
-                var birth = now - TimeSpan.FromDays(365 * i);
+                var birth = now.Date - TimeSpan.FromDays(365 * i);
                 var animal = new Animal() { Name = $"animalName{i}", OwnerId = i, Type = (AnimalTypes)i, BirthDate = birth, CreatedAt = now };
                 Animals.Add(animal);
 
