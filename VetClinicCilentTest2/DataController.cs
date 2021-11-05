@@ -62,9 +62,9 @@ namespace VetClinicCilentTest2
         }
 
         /// <summary>
-        /// Возвращает 
+        /// Возвращает флаг начальной инициализации <see cref="DataGridView"/>.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>true, если инициализация <see cref="DataGridView"/> произошла, иначе false.</returns>
         public bool IsRowsSet()
         {
             return isRowsInitialized;
@@ -73,6 +73,7 @@ namespace VetClinicCilentTest2
         /// <summary>
         /// Отправляет запрос на получение записей.
         /// В случае успеха обновляет содержимое <see cref="DataGridView"/>.
+        /// При первом вызове устанавливает флаг начальной инициализации.
         /// </summary>
         public async void UpdateRows()
         {
@@ -85,7 +86,7 @@ namespace VetClinicCilentTest2
         }
 
         /// <summary>
-        /// Открывает диалог создания записи. Отправляет запрос на добавление записи.
+        /// Открывает диалог создания записи и отправляет запрос на ее добавление.
         /// В случае успеха обновляет содержимое <see cref="DataGridView"/>.
         /// </summary>
         public async void CreateRow()
@@ -108,7 +109,7 @@ namespace VetClinicCilentTest2
 
         /// <summary>
         /// Открывает диалог редактирования текущей записи.
-        /// Если строка изменена, отправляет запрос на обновление записи.
+        /// Если запись была изменена, отправляет запрос на ее обновление.
         /// В случае успеха обновляет содержимое <see cref="DataGridView"/>.
         /// </summary>
         public async void EditCurrentRow()
@@ -158,7 +159,7 @@ namespace VetClinicCilentTest2
         /// Получает строку пути к api для текущего типа.
         /// </summary>
         /// <param name="id">ID записи.</param>
-        /// <returns></returns>
+        /// <returns>Url строка.</returns>
         private static string GetTypeUrl(int? id = null)
         {
             if (id != null)
