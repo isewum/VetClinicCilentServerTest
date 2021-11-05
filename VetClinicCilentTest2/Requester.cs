@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using VetClinicModelLibTest;
 
 namespace VetClinicCilentTest2
@@ -14,11 +13,16 @@ namespace VetClinicCilentTest2
     {
         private delegate Task<HttpResponseMessage> Request(string url, StringContent content);
 
+        public delegate void RequestSendingEventHandler();
+        public delegate void ResponseReceivedEventHandler(bool isSuccess, string errorMessage);
+
+        public static event RequestSendingEventHandler RequestSending;
+        public static event ResponseReceivedEventHandler ResponseReceived;
+
         /// <summary>
         /// Отправляет Http запрос к api на получение записей из таблицы БД.
         /// </summary>
         /// <returns>Список объектов указанного типа при успешно выполненном запросе, иначе null.</returns>
-        ///// <exception cref="HttpRequestException"></exception>
         public static async Task<List<T>> GetAsync<T>(HttpClient client, string url) where T : ModelBase
         {
             Request request = async (_url, _content) => await client.GetAsync(_url);
@@ -36,7 +40,6 @@ namespace VetClinicCilentTest2
         /// Отправляет Http запрос к api на добавление записи в таблицу БД.
         /// </summary>
         /// <returns>true при успешно выполненном запросе, иначе false.</returns>
-        ///// <exception cref="HttpRequestException"></exception>
         public static async Task<bool> CreateAsync<T>(HttpClient client, string url, T entity) where T : ModelBase
         {
             Request request = async (_url, _content) => await client.PostAsync(_url, _content);
@@ -52,7 +55,6 @@ namespace VetClinicCilentTest2
         /// Отправляет Http запрос к api на обновление записи в таблицу БД.
         /// </summary>
         /// <returns>true при успешно выполненном запросе, иначе false.</returns>
-        ///// <exception cref="HttpRequestException"></exception>
         public static async Task<bool> UpdateAsync<T>(HttpClient client, string url, T entity) where T : ModelBase
         {
             Request request = async (_url, _content) => await client.PutAsync(_url, _content);
@@ -60,7 +62,7 @@ namespace VetClinicCilentTest2
             string jsonString = JsonConvert.SerializeObject(entity);
             StringContent content = new(jsonString, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await HandleRequest($"{url}/{entity.Id}", content, request);
+            HttpResponseMessage response = await HandleRequest(url, content, request);
             return response != null && response.StatusCode == HttpStatusCode.OK;
         }
 
@@ -68,12 +70,11 @@ namespace VetClinicCilentTest2
         /// Отправляет Http запрос к api на удаление записи из таблицы БД.
         /// </summary>
         /// <returns>true при успешно выполненном запросе, иначе false.</returns>
-        ///// <exception cref="HttpRequestException"></exception>
-        public static async Task<bool> DeleteAsync(HttpClient client, string url, int id)
+        public static async Task<bool> DeleteAsync(HttpClient client, string url)
         {
             Request request = async (_url, _content) => await client.DeleteAsync(_url);
 
-            HttpResponseMessage response = await HandleRequest($"{url}/{id}", null, request);
+            HttpResponseMessage response = await HandleRequest(url, null, request);
             return response != null && response.StatusCode == HttpStatusCode.NoContent;
         }
 
@@ -87,18 +88,17 @@ namespace VetClinicCilentTest2
         /// <returns>Http ответ сервера при успешно выполненном запросе, иначе null.</returns>
         private static async Task<HttpResponseMessage> HandleRequest(string url, StringContent content, Request request)
         {
+            RequestSending?.Invoke();
+
             try
             {
-                HttpResponseMessage response = await request(url, content);
-                return response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = (await request(url, content)).EnsureSuccessStatusCode();
+                ResponseReceived?.Invoke(true, null);
+                return response;
             }
-            /*catch (HttpRequestException)
-            {
-                throw;
-            }*/
             catch (Exception e)
             {
-                MessageBox.Show($"Ошибка при отправке запроса: {e.Message}", "Ошибка");
+                ResponseReceived?.Invoke(false, e.Message);
                 return null;
             }
         }

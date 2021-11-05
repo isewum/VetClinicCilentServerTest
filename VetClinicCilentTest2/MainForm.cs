@@ -1,12 +1,7 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using VetClinicModelLibTest;
 
@@ -24,67 +19,57 @@ namespace VetClinicCilentTest2
 
             InitializeComponent();
 
-            dataControllers = new List<object>();
-            dataControllers.Add(new DataViewer<Doctor>(tabControl, "Ветеринары"));
-            dataControllers.Add(new DataViewer<Owner>(tabControl, "Клиенты"));
-            dataControllers.Add(new DataViewer<Animal>(tabControl, "Животные"));
-            dataControllers.Add(new DataViewer<Vaccine>(tabControl, "Прививки"));
-            dataControllers.Add(new DataViewer<Service>(tabControl, "Услуги"));
+            dataControllers = new List<object>
+            {
+                new DataController<Doctor>(tabControl, "Ветеринары", client),
+                new DataController<Owner>(tabControl, "Клиенты", client),
+                new DataController<Animal>(tabControl, "Животные", client),
+                new DataController<Vaccine>(tabControl, "Прививки", client),
+                new DataController<Service>(tabControl, "Услуги", client)
+            };
+
+            Requester.RequestSending += RequestSending;
+            Requester.ResponseReceived += ResponseReceived;
         }
 
         #region Methods
-        private async void UpdateCurrentTab()
+        private void UpdateCurrentTab()
         {
-            connectionStatusLabel.Text = "Отправка запроса...";
-            Update();
-
-            int tabIndex = tabControl.SelectedIndex;
-            Type dataType = dataControllers[tabIndex].GetType().GetGenericArguments()[0];
-            string url = dataType.Name + "s";
-
-            dynamic result = await (dynamic)InvokeRequesterGenericMethod("GetAsync", new object[] { client, url } );
-
-            if (result == null)
-            {
-                connectionStatusLabel.Text = "Ошибка подключения.";
-                return;
-            }
-
-            InvokeDataViewerMethod("SetRows", new object[] { result });
-            connectionStatusLabel.Text = $"Готово. Получено записей: {result.Count}";
+            InvokeDataControllerMethod("UpdateRows");
         }
 
-        private void SaveCurrentTabChanges()
+        private void CreateCurrentTabRow()
         {
-            // TODO
-            //object changedRows = InvokeDataViewerMethod("GetChangedRows");
+            InvokeDataControllerMethod("CreateRow");
         }
 
         private void DeleleCurrentTabRow()
         {
-            // TODO
+            InvokeDataControllerMethod("DeleteCurrentRow");
         }
+
+        private void EditCurrentTabRow()
+        {
+            InvokeDataControllerMethod("EditCurrentRow");
+        }
+
 
         private bool IsCurrentTabSet()
         {
-            return (bool)InvokeDataViewerMethod("IsRowsSet");
+            return (bool)InvokeDataControllerMethod("IsRowsSet");
         }
 
-        private object InvokeDataViewerMethod(string methodName, object[] parameters = null)
+        /// <summary>
+        /// Вызывает метод класса <see cref="DataController{T}"/> с использованием отражения.
+        /// </summary>
+        /// <param name="methodName">Имя метода.</param>
+        /// <param name="parameters">Аргументы, принимаемые методом.</param>
+        /// <returns>Объект, возвращаемый вызываемым методом.</returns>
+        private object InvokeDataControllerMethod(string methodName, object[] parameters = null)
         {
             int tabIndex = tabControl.SelectedIndex;
             MethodInfo method = dataControllers[tabIndex].GetType().GetMethod(methodName);
             return method.Invoke(dataControllers[tabIndex], parameters);
-        }
-
-        private object InvokeRequesterGenericMethod(string methodName, object[] parameters = null)
-        {
-            int tabIndex = tabControl.SelectedIndex;
-            Type dataType = dataControllers[tabIndex].GetType().GetGenericArguments()[0];
-            MethodInfo method = typeof(Requester).GetMethod(methodName);
-            MethodInfo genericMethod = method.MakeGenericMethod(dataType);
-
-            return genericMethod.Invoke(null, parameters);
         }
         #endregion
 
@@ -113,14 +98,43 @@ namespace VetClinicCilentTest2
             UpdateCurrentTab();
         }
 
-        private void saveButton_Click(object sender, EventArgs e)
-        {
-            SaveCurrentTabChanges();
-        }
-
         private void deleteButton_Click(object sender, EventArgs e)
         {
             DeleleCurrentTabRow();
+        }
+
+        private void createButton_Click(object sender, EventArgs e)
+        {
+            CreateCurrentTabRow();
+        }
+
+        private void editButton_Click(object sender, EventArgs e)
+        {
+            EditCurrentTabRow();
+        }
+
+        private void RequestSending()
+        {
+            connectionStatusLabel.Text = "Отправка запроса...";
+            parentPanel.Enabled = false;
+            this.UseWaitCursor = true;
+        }
+
+        private void ResponseReceived(bool isSuccess, string errorMessage)
+        {
+            connectionStatusLabel.Text = isSuccess ? $"Готово." : errorMessage;
+            parentPanel.Enabled = true;
+            this.UseWaitCursor = false;
+
+            bool buttonState = isSuccess || IsCurrentTabSet();
+            deleteButton.Enabled = buttonState;
+            createButton.Enabled = buttonState;
+            editButton.Enabled = buttonState;
+
+            /*if (!isSuccess)
+            {
+                MessageBox.Show(errorMessage, "Ошибка!");
+            }*/
         }
         #endregion
     }
