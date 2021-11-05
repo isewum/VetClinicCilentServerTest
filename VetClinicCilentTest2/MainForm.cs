@@ -60,7 +60,7 @@ namespace VetClinicCilentTest2
         }
 
         /// <summary>
-        /// Вызов метода класса <see cref="DataController{T}"/> с использованием отражения.
+        /// Вызывает метод класса <see cref="DataController{T}"/> с использованием отражения.
         /// </summary>
         /// <param name="methodName">Имя метода.</param>
         /// <param name="parameters">Аргументы, принимаемые методом.</param>

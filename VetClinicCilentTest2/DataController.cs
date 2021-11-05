@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+﻿using Shared.ComponentModel.SortableBindingList;
+using System.ComponentModel;
+using System.Net.Http;
 using System.Windows.Forms;
 using VetClinicModelLibTest;
 
@@ -10,10 +12,12 @@ namespace VetClinicCilentTest2
         private readonly HttpClient client;
 
         private bool isRowsInitialized;
+        private int? lastSortedColumn;
 
         public DataController(TabControl tabControl, string tabName, HttpClient client)
         {
             isRowsInitialized = false;
+            lastSortedColumn = null;
             this.client = client;
 
             InitControls(tabControl, tabName);
@@ -54,23 +58,36 @@ namespace VetClinicCilentTest2
             table.ReadOnly = true;
 
             table.CellDoubleClick += CellDoubleClick;
+            table.ColumnHeaderMouseClick += ColumnHeaderClick;
         }
 
+        /// <summary>
+        /// Возвращает 
+        /// </summary>
+        /// <returns></returns>
         public bool IsRowsSet()
         {
             return isRowsInitialized;
         }
 
+        /// <summary>
+        /// Отправляет запрос на получение записей.
+        /// В случае успеха обновляет содержимое <see cref="DataGridView"/>.
+        /// </summary>
         public async void UpdateRows()
         {
             var rows = await Requester.GetAsync<T>(client, GetTypeUrl());
             if (rows == null)
                 return;
 
-            table.DataSource = rows;
+            table.DataSource = new SortableBindingList<T>(rows);
             isRowsInitialized = true;
         }
 
+        /// <summary>
+        /// Открывает диалог создания записи. Отправляет запрос на добавление записи.
+        /// В случае успеха обновляет содержимое <see cref="DataGridView"/>.
+        /// </summary>
         public async void CreateRow()
         {
             if (!isRowsInitialized)
@@ -89,6 +106,11 @@ namespace VetClinicCilentTest2
             }
         }
 
+        /// <summary>
+        /// Открывает диалог редактирования текущей записи.
+        /// Если строка изменена, отправляет запрос на обновление записи.
+        /// В случае успеха обновляет содержимое <see cref="DataGridView"/>.
+        /// </summary>
         public async void EditCurrentRow()
         {
             if (!isRowsInitialized || table.SelectedRows.Count == 0)
@@ -96,8 +118,10 @@ namespace VetClinicCilentTest2
 
             T entity = table.SelectedRows[0].DataBoundItem as T;
             T copy = (T)entity.Clone();
+
             EntityDialog dialog = new EntityDialog(DialogTypes.Edit, copy);
             dialog.ShowDialog();
+
             if (dialog.DialogResult != DialogResult.OK || entity.Equals(copy))
                 return;
 
@@ -108,6 +132,10 @@ namespace VetClinicCilentTest2
             }
         }
 
+        /// <summary>
+        /// Отправляет запрос на удаление текущей записи.
+        /// Предварительно выводит сообщение для подтверждения действия.
+        /// </summary>
         public async void DeleteCurrentRow()
         {
             if (!isRowsInitialized || table.SelectedRows.Count == 0)
@@ -126,6 +154,11 @@ namespace VetClinicCilentTest2
             }
         }
 
+        /// <summary>
+        /// Получает строку пути к api для текущего типа.
+        /// </summary>
+        /// <param name="id">ID записи.</param>
+        /// <returns></returns>
         private static string GetTypeUrl(int? id = null)
         {
             if (id != null)
@@ -138,7 +171,22 @@ namespace VetClinicCilentTest2
         #region EventHandlers
         private void CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            EditCurrentRow();
+            if (e.RowIndex != -1)
+                EditCurrentRow();
+        }
+
+        private void ColumnHeaderClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (lastSortedColumn == null || lastSortedColumn != e.ColumnIndex)
+            {
+                table.Sort(table.Columns[e.ColumnIndex], ListSortDirection.Ascending);
+                lastSortedColumn = e.ColumnIndex;
+            }
+            else
+            {
+                table.Sort(table.Columns[e.ColumnIndex], ListSortDirection.Descending);
+                lastSortedColumn = null;
+            }
         }
         #endregion
     }
