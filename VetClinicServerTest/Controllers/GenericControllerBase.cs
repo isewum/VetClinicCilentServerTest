@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
 using VetClinicModelLibTest;
@@ -11,8 +12,8 @@ namespace VetClinicServerTest.Controllers
     [Route("api/[controller]")]
     public class GenericControllerBase<T> : ControllerBase where T : ModelBase
     {
-        private readonly ClinicContext _context;
-        private readonly DbSet<T> dbSet;
+        protected readonly ClinicContext _context;
+        protected readonly DbSet<T> dbSet;
 
         public GenericControllerBase(ClinicContext context)
         {
@@ -25,7 +26,8 @@ namespace VetClinicServerTest.Controllers
         public virtual async Task<IActionResult> GetMany()
         {
             var entities = await dbSet.ToListAsync();
-            return Ok(entities);
+            string jsonString = JsonConvert.SerializeObject(entities);
+            return Ok(jsonString);
         }
 
         // GET: api/{entity}/5
@@ -38,7 +40,8 @@ namespace VetClinicServerTest.Controllers
                 return NotFound();
             }
 
-            return Ok(entity);
+            string jsonString = JsonConvert.SerializeObject(entity);
+            return Ok(jsonString);
         }
 
         // POST: api/{entity}
@@ -84,7 +87,8 @@ namespace VetClinicServerTest.Controllers
                 }
             }
 
-            return Ok(entity);
+            string jsonString = JsonConvert.SerializeObject(entity);
+            return Ok(jsonString);
         }
 
         // DELETE: api/{entity}/5
@@ -103,7 +107,7 @@ namespace VetClinicServerTest.Controllers
             return NoContent();
         }
 
-        private async Task<bool> EntryExists(int id)
+        protected async Task<bool> EntryExists(int id)
         {
             return await dbSet.AnyAsync(e => e.Id == id);
         }

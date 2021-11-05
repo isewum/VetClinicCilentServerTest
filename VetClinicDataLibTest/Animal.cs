@@ -1,11 +1,15 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 
 namespace VetClinicModelLibTest
 {
     public class Animal : ModelBase
     {
+        [IgnoreDataMember, Browsable(false)]
+        public Owner Owner { get; set; }
+
         [DisplayName("ID хозяина"), Range(1, int.MaxValue), Required]
         public int OwnerId { get; set; }
 

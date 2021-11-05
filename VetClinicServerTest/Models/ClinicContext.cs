@@ -15,12 +15,12 @@ namespace VetClinicServerTest.Models
         public ClinicContext(DbContextOptions<ClinicContext> options) : base(options)
         {
             //Database.EnsureDeleted();
-            
+
             if (Database.EnsureCreated())
-                DbInit();
+                DbTestInit();
         }
 
-        private void DbInit()
+        private void DbTestInit()
         {
             var now = DateTime.UtcNow;
             for (int i = 1; i < 4; i++)
@@ -32,11 +32,11 @@ namespace VetClinicServerTest.Models
                 Doctors.Add(doctor);
 
                 var birth = now.Date - TimeSpan.FromDays(365 * i);
-                var animal = new Animal() { Name = $"animalName{i}", OwnerId = i, Type = (AnimalTypes)i, BirthDate = birth, CreatedAt = now };
+                var animal = new Animal() { Name = $"animalName{i}", Owner = owner, Type = (AnimalTypes)i, BirthDate = birth, CreatedAt = now };
                 Animals.Add(animal);
 
                 var done = now - TimeSpan.FromDays(3 * i);
-                var vaccine = new Vaccine() { Title = $"vaccineTitle{i}", AnimalId = i, DoctorId = i, DoneAt = done, CreatedAt = now };
+                var vaccine = new Vaccine() { Title = $"vaccineTitle{i}", Animal = animal, Doctor = doctor, DoneAt = done, CreatedAt = now };
                 Vaccines.Add(vaccine);
 
                 var servise = new Service() { Title = $"serviceTitle{i}", Description = $"serviceDescription{i}", Price = 150 * i, CreatedAt = now };

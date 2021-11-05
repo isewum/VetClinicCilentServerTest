@@ -65,6 +65,7 @@ namespace VetClinicCilentTest2
             // 
             // connectionStatusLabel
             // 
+            this.connectionStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.connectionStatusLabel.Name = "connectionStatusLabel";
             this.connectionStatusLabel.Size = new System.Drawing.Size(0, 17);
             // 
